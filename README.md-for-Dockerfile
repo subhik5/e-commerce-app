@@ -1,0 +1,121 @@
+#README: Online Shop Project - Dockerfile
+
+#Overview
+
+Welcome to the Online Shop project! This project is a demo e-commerce application for a Hackathon Phase 1. In this project, we focus on learning best practices for Git & GitHub, Linux, and Docker.
+
+We will use Docker to package our application, making it easy to run anywhere. This guide will help you understand how to build and run the app inside a Docker container.
+
+#What is Docker?
+
+Docker helps package applications and their dependencies into a container. A container is like a special box where the app runs. It makes sure the app works exactly the same on different computers, which is really helpful when you need to share your work with others.
+
+#Why Are We Using Docker?
+
+We are using Docker for these reasons:
+Easy to Run Anywhere: With Docker, you don't need to worry about your app not working because of missing files or libraries. Everything is inside the container.
+Consistency: It makes sure the app runs the same on your computer and other people’s computers.
+Deployment: Docker makes it easy to move your app from your computer to a server where others can see it!
+Steps to Use the Dockerfile for the Online Shop Project
+Below is a simple guide explaining the Dockerfile commands.
+
+#Dockerfile Explanation
+Step 1: Build Stage
+#Dockerfile
+
+FROM node:20-alpine as build 
+
+FROM tells Docker which image to use as a base. Here, we are using node:20-alpine, which is a lightweight version of Node.js with fewer unnecessary things. This makes the image smaller and faster.
+as build creates a named stage, so we can refer to it later. This is useful for separating different tasks.
+#Dockerfile
+
+WORKDIR /app
+
+WORKDIR sets the working directory inside the container. We are telling Docker to use a folder named /app to store our app files.
+#dockerfile
+
+
+COPY package*.json ./
+
+COPY takes files from your local machine and puts them inside the Docker container. Here, we're copying the package.json and package-lock.json files, which contain the list of dependencies (things the app needs to run).
+#Dockerfile
+
+RUN npm ci
+
+RUN runs commands in the container. Here, npm ci installs all the app dependencies from package.json. It’s like downloading all the things your app needs to work.
+#Dockerfile
+
+COPY . .
+
+This command copies the rest of your project files (like JavaScript, HTML, CSS) into the Docker container.
+#Dockerfile
+
+RUN npm run build
+
+RUN npm run build tells Docker to run the build command, which makes the app ready for production. It creates a dist/ folder, which contains the ready-to-go version of the app.
+
+Step 2: Production Stage
+#Dockerfile
+
+FROM node:20-alpine
+
+We use another FROM to start a new stage for production. We’re using the same node:20-alpine image.
+#Dockerfile
+
+WORKDIR /app
+
+Again, we set the working directory to /app inside the container.
+#Dockerfile
+
+RUN npm install -g serve
+
+RUN npm install -g serve installs serve, a tool to serve static files (like HTML, CSS, and JavaScript) on a web server. This is used to display the app.
+#Dockerfile
+
+COPY --from=build /app/dist ./dist
+
+COPY --from=build copies the dist/ folder (which we created during the build stage) from the previous build stage to the current container. This is what we will serve.
+
+Step 3: Final Setup and Running the App
+#Dockerfile
+
+EXPOSE 3000
+
+EXPOSE 3000 tells Docker that our app will be listening on port 3000. This allows people to access the app from their web browsers.
+#Dockerfile
+
+CMD ["serve", "-s", "dist", "-l", "3000"]
+
+CMD is the command Docker runs when the container starts. In this case, serve will serve the app from the dist/ folder on port 3000.
+
+How to Build and Run the Docker Container
+Once you have your Dockerfile set up, follow these steps to build and run your Docker container:
+
+Step 1: Build the Docker Image
+To build your Docker image, run this command in the folder where your Dockerfile is located:
+
+
+
+#docker build -t shop-app .
+docker build tells Docker to build your app.
+
+
+Step 2: Run the Docker Container
+Now that the image is built, you can run it with:
+
+
+docker run -p 3000:3000 shop-app
+
+docker run starts the container and makes it run.
+-p 3000:3000 maps port 3000 on your computer to port 3000 in the Docker container, allowing you to access the app through your browser at http://localhost:3000.
+
+Why Use Docker for This Project?
+Easy Setup: Docker makes it super easy to set up and run this app without worrying about missing files or dependencies.
+Sharing: Once the app is in Docker, you can share it with anyone, and it will work the same way for them as it does for you.
+Portability: You can run the same Docker container on any machine, anywhere — whether it's your laptop, a friend's laptop, or a cloud server.
+
+Conclusion
+ You understand how Docker helps package the app into a container, making it easy to deploy and run. By using Docker, GitHub, and Git for version control, you're following best practices that will help you as a developer in real-world projects.
+
+
+This README file explains the steps and commands used in your Dockerfile in a simple way so you can understand what each part does and why it's important for running your app smoothly inside Docker.Nowyou can push the image on your Docker-hub and make a repository on github.
